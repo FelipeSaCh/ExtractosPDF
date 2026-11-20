@@ -118,3 +118,30 @@ def test_multiples_extractos_numeracion_por_archivo(libro, tmp_path):
     lin = gen.preparar()
     assert lin["archivo"].unique().tolist() == [0, 1]
     assert gen.conteo_comprobantes(lin)["AJB"] == 3
+
+def test_detalle_bancarios(libro):
+    gen = GeneradorArchivoPlano(libro)
+    gen.preparar()
+    det = gen.bancarios_detalle
+    assert len(det) == 3 and set(det["concepto"]) == {"GMF 4X1000", "INTERESES AHORROS", "CUOTA DE MANEJO"}
+    assert det["grupo"].str.endswith("CUENTA 123-456789-01").all()
+
+
+def test_excluir_bancarios(libro):
+    gen = GeneradorArchivoPlano(libro)
+    gen.preparar()
+    gmf = gen.bancarios_detalle[gen.bancarios_detalle["concepto"] == "GMF 4X1000"].iloc[0]
+    gen.excluir_bancarios = {(0, int(gmf["id"]))}
+    movs = gen.preparar().drop_duplicates("mov")
+    assert movs["clase"].value_counts().to_dict() == {"BANCARIO": 2, "EGRESO": 3, "RECIBO": 1, "NOMINA": 1}
+    assert len(gen.bancarios_detalle) == 2
+
+
+def test_excluir_bancarios_multiples(libro):
+    gen = GeneradorExtractosMultiples([libro, libro])
+    gen.preparar()
+    assert len(gen.bancarios_detalle) == 6
+    fila = gen.bancarios_detalle[gen.bancarios_detalle["archivo"] == 1].iloc[0]
+    gen.excluir_bancarios = {(1, int(fila["id"]))}
+    gen.preparar()
+    assert gen.bancarios_detalle.groupby("archivo").size().to_dict() == {0: 3, 1: 2}

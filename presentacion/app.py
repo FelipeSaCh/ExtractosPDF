@@ -6,15 +6,15 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 import pandas as pd
 from PIL import Image, ImageTk
 
-from infraestructura.excel import abrir_con_sistema
-from infraestructura.pdf_engine import PDFEngine, PDFInvalidPasswordError, PDFPasswordRequiredError
-from nucleo.config import URL_MANUAL, ruta_asset
+from motor_extractos.infraestructura.excel import abrir_con_sistema
+from motor_extractos.infraestructura.pdf_engine import PDFEngine, PDFInvalidPasswordError, PDFPasswordRequiredError
+from aplicacion.config import URL_MANUAL, ruta_asset
 from presentacion import actualizaciones
 from presentacion.componentes import elegir_opcion
 from presentacion.dialogo_plano import generar_plano_con_dialogo
 from presentacion.hilos import TrabajadorEnSegundoPlano
 from presentacion.tema import COLOR_BG, COLOR_CANVAS_BG, aplicar_estilos, construir_warning_box
-from servicios.fuentes import (BTN_EXCEL, BTN_EXTRACTO, BTN_PLANILLA, BTN_PLANO, BTN_PN, BTN_SOC, FUENTES,
+from motor_extractos.servicios.fuentes import (BTN_EXCEL, BTN_EXTRACTO, BTN_PLANILLA, BTN_PLANO, BTN_PN, BTN_SOC, FUENTES,
                                SIN_FUENTE, SIN_REGISTROS, con_prefijo, procesar_excel_bancolombia)
 from version import __version__
 
@@ -445,7 +445,7 @@ class PDFViewerApp:
         )
 
     def _on_extractos_multiples(self, excels):
-        from servicios.plano import GeneradorExtractosMultiples
+        from motor_extractos.servicios.plano import GeneradorExtractosMultiples
 
         self._terminar_tarea()
         self._registrar_excel(excels[-1])
@@ -460,7 +460,7 @@ class PDFViewerApp:
         fuente = self._fuente()
         if not self._modulo_disponible(fuente):
             return
-        from servicios.seguridad_social import generador_para
+        from motor_extractos.servicios.seguridad_social import generador_para
 
         rutas = rutas or [self.pdf_engine.current_path]
         generador = generador_para(fuente.generador(), rutas, **self.opciones_planilla)

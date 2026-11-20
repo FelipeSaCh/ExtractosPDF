@@ -2,10 +2,10 @@ import re
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from infraestructura import administradoras
-from nucleo.config import RUTA_ADMINISTRADORAS
-from nucleo.texto import normalizar as _normalizar
-from nucleo.validaciones import (MSG_CODIGO_PILA, MSG_CUENTA, MSG_NIT, PATRON_CODIGO_PILA, PATRON_CUENTA,
+from motor_extractos.infraestructura import administradoras
+from motor_extractos.nucleo.config import RUTA_ADMINISTRADORAS
+from motor_extractos.nucleo.texto import normalizar as _normalizar
+from motor_extractos.nucleo.validaciones import (MSG_CODIGO_PILA, MSG_CUENTA, MSG_NIT, PATRON_CODIGO_PILA, PATRON_CUENTA,
                                  PATRON_NIT)
 from presentacion.componentes import modal
 

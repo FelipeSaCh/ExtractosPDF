@@ -4,11 +4,12 @@ from tkinter import filedialog, messagebox, ttk
 
 import pandas as pd
 
-from nucleo.validaciones import (MSG_COMPROBANTE, MSG_CUENTA, MSG_TERCERO, PATRON_COMPROBANTE, PATRON_CUENTA,
+from motor_extractos.nucleo.validaciones import (MSG_COMPROBANTE, MSG_CUENTA, MSG_TERCERO, PATRON_COMPROBANTE, PATRON_CUENTA,
                                  PATRON_TERCERO)
 from presentacion.componentes import modal
+from presentacion.dialogo_bancarios import VentanaDetalleBancarios, confirmar_bancarios
 from presentacion.hilos import con_carga
-from servicios import config_plano
+from motor_extractos.servicios import config_plano
 
 NOMBRES_CLASE = {
     "EGRESO": "Egresos",
@@ -122,6 +123,8 @@ class DialogoPlano(tk.Toplevel):
         if getattr(self.gen, "CLASE_BANCARIO", None) in self.predeterminados:
             ttk.Button(frm_clases, text="Pasar retiros a AJB", command=self._pasar_retiros).grid(
                 row=len(self.predeterminados), column=0, columnspan=3, sticky="ew", pady=(8, 0))
+            ttk.Button(frm_clases, text="Ver detalle bancarios", command=self._ver_bancarios).grid(
+                row=len(self.predeterminados) + 1, column=0, columnspan=3, sticky="ew", pady=(4, 0))
 
         self.frm_consec = ttk.LabelFrame(izq, text="Consecutivo por comprobante", padding=10)
         self.frm_consec.pack(fill=tk.X, pady=(10, 0))
@@ -351,6 +354,15 @@ class DialogoPlano(tk.Toplevel):
         self._refrescar()
         messagebox.showinfo("Retiros", f"{n} movimientos pasados a {self.tipo_clase[bancario]}.", parent=self)
 
+    def _ver_bancarios(self):
+        calc = self._calcular()
+        if not calc["tipo"].str[:2].isin(self.gen.PREFIJOS_BANCARIO).any():
+            messagebox.showinfo("Bancarios", "No hay movimientos en comprobantes bancarios.", parent=self)
+            return
+        self.wait_window(VentanaDetalleBancarios(self, calc, self.gen))
+        if self.winfo_exists():
+            self.grab_set()
+
     def _refrescar_opciones(self):
         guardados = {t for e in self.cfg.get("empresas", {}).values() for t in e.get("clases", {}).values()}
         opciones = sorted(set(self.predeterminados.values()) | set(self.lin["tipo"]) | guardados)
@@ -462,7 +474,7 @@ def generar_plano_con_dialogo(parent, excel_path, generador=None, confirmar=True
         return None
 
     if generador is None:
-        from servicios.plano import GeneradorArchivoPlano
+        from motor_extractos.servicios.plano import GeneradorArchivoPlano
         generador = GeneradorArchivoPlano(excel_path)
 
     try:
@@ -474,6 +486,17 @@ def generar_plano_con_dialogo(parent, excel_path, generador=None, confirmar=True
     if lin is None or lin.empty:
         messagebox.showinfo("Archivo Plano", "El archivo no contiene movimientos con valor.", parent=parent)
         return None
+
+    excluir = confirmar_bancarios(parent, generador)
+    if excluir is None:
+        return None
+    if excluir:
+        generador.excluir_bancarios = excluir
+        try:
+            lin = con_carga(parent, "Recalculando movimientos...", generador.preparar)
+        except Exception as e:
+            messagebox.showerror("Error en Plano", f"No fue posible leer los movimientos:\n{e}", parent=parent)
+            return None
 
     if getattr(generador, "advertencias", None):
         messagebox.showwarning("Archivo Plano", "\n\n".join(generador.advertencias), parent=parent)

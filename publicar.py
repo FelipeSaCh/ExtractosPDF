@@ -8,7 +8,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAIZ))
-import infraestructura.actualizador as act  # noqa: E402
+import aplicacion.actualizador as act  # noqa: E402
 from version import __version__  # noqa: E402
 
 

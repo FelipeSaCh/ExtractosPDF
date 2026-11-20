@@ -1,6 +1,6 @@
 from tkinter import messagebox
 
-from infraestructura import actualizador
+from aplicacion import actualizador
 from presentacion.hilos import TrabajadorEnSegundoPlano
 
 

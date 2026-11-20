@@ -12,6 +12,7 @@ python -m nuitka app_gui.py ^
   --msvc=latest ^
   --assume-yes-for-downloads ^
   --enable-plugin=tk-inter ^
+  --include-package=motor_extractos ^
   --include-package-data=pdfminer ^
   --windows-console-mode=disable ^
   --windows-icon-from-ico=%ICONO% ^
