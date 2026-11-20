@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from servicios.libro_extracto import escribir_libro
-from servicios.plano import GeneradorArchivoPlano, GeneradorExtractosMultiples
+from motor_extractos.servicios.plano import GeneradorArchivoPlano, GeneradorExtractosMultiples
 
 NIT = "900111222"
 CONSECUTIVOS = {"EG1": 5, "EG2": 7, "RC1": 10, "AJB": 3}

@@ -97,6 +97,6 @@ def sin_conversion_xls(monkeypatch):
     """Sustituye la conversión COM a Excel 5.0/95 por un renombrado (pruebas sin Microsoft Excel)."""
     import os
 
-    import servicios.plano as plano
-
+    import motor_extractos.servicios.plano as plano
+        
     monkeypatch.setattr(plano, "convertir_a_xls95", lambda origen, destino: os.replace(origen, destino))
